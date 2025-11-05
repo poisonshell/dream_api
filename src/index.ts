@@ -21,9 +21,13 @@ async function bootstrap() {
   try {
     await AppDataSource.initialize();
     console.log('Database connected successfully');
-
-    await AppDataSource.runMigrations();
-    console.log('Migrations executed successfully');
+    
+    if (process.env.NODE_ENV === 'production') {
+      await AppDataSource.runMigrations();
+      console.log('Migrations executed successfully');
+    } else {
+      console.log('Development mode: using synchronize instead of migrations');
+    }
 
     const schema = await buildAppSchema();
 
