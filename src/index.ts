@@ -22,16 +22,20 @@ async function bootstrap() {
     await AppDataSource.initialize();
     console.log('Database connected successfully');
     
+    // Run migrations in production if they exist
     if (process.env.NODE_ENV === 'production') {
-      await AppDataSource.runMigrations();
-      console.log('Migrations executed successfully');
+      const pendingMigrations = await AppDataSource.showMigrations();
+      if (pendingMigrations) {
+        await AppDataSource.runMigrations();
+        console.log('Migrations executed successfully');
+      } else {
+        console.log('No pending migrations');
+      }
     } else {
       console.log('Development mode: using synchronize instead of migrations');
     }
 
-    const schema = await buildAppSchema();
-
-    const app = express();
+    const schema = await buildAppSchema();    const app = express();
 
     app.use(
       helmet({
